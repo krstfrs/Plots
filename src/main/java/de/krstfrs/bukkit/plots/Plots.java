@@ -28,7 +28,11 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.bukkit.selections.Selection;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
+import de.krstfrs.bukkit.plots.util.CommandException;
 
 public class Plots extends JavaPlugin {
 
@@ -69,24 +73,40 @@ public class Plots extends JavaPlugin {
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
 
-		if (command.getName().equalsIgnoreCase("claimplot"))
-			return commandClaim(sender, args);
+		try {
 
-		return false;
+			if (command.getName().equalsIgnoreCase("claimplot"))
+				commandClaimPlot(sender, args);
+
+		} catch (CommandException e) {
+			sender.sendMessage(ChatColor.RED + e.getMessage());
+		}
+
+		return true;
 
 	}
 
-	private boolean commandClaim(CommandSender sender, String[] args) {
+	private void commandClaimPlot(CommandSender sender, String[] args)
+			throws CommandException {
 
 		Player player = getPlayer(sender);
 
-		if (player == null) {
-			sender.sendMessage(ChatColor.RED
-					+ "Can only be executed by a player.");
-			return false;
-		}
+		if (player == null)
+			throw new CommandException("Can only be executed by a player.");
 
-		return false;
+		Selection sel = worldEdit.getSelection(player);
+
+		if (sel == null)
+			throw new CommandException("Select a region with WorldEdit first.");
+
+		if (!(sel instanceof CuboidSelection))
+			throw new CommandException("Only cuboid selections are supported.");
+
+		CuboidSelection cuboid = (CuboidSelection) sel;
+
+		if (cuboid.getHeight() != cuboid.getWorld().getMaxHeight())
+			throw new CommandException(
+					"Expand your selection vertically first.");
 
 	}
 
