@@ -11,3 +11,15 @@ processResources {
 
 	expand version: version
 }
+
+repositories {
+
+	mavenRepo urls: 'http://repo.bukkit.org/content/groups/public'
+	mavenRepo urls: 'http://mvn2.sk89q.com/repo'
+}
+
+dependencies {
+
+	compile group: 'org.bukkit', name: 'bukkit', version: '1.2.5-R1.1'
+	compile group: 'com.sk89q', name: 'worldguard', version: '5.5.1', transitive: false
+}

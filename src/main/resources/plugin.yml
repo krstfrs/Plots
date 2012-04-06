@@ -1,3 +1,4 @@
 name: Plots
 version: $version
 main: de.krstfrs.bukkit.plots.Plots
+softdepend: [WorldGuard]

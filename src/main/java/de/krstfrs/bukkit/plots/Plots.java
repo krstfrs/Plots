@@ -16,6 +16,51 @@
 
 package de.krstfrs.bukkit.plots;
 
-public class Plots {
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
+public class Plots extends JavaPlugin {
+
+	Logger log;
+	PluginManager pm;
+
+	WorldGuardPlugin worldGuard;
+
+	@Override
+	public void onEnable() {
+
+		log = this.getLogger();
+		pm = this.getServer().getPluginManager();
+
+		worldGuard = getWorldGuard();
+
+		if (worldGuard == null) {
+			log.log(Level.SEVERE, "WorldGuard not found, disabling Plots");
+			pm.disablePlugin(this);
+		}
+
+	}
+
+	@Override
+	public void onDisable() {
+
+	}
+
+	private WorldGuardPlugin getWorldGuard() {
+
+		Plugin plugin = pm.getPlugin("WorldGuard");
+
+		if ((plugin == null) || !(plugin instanceof WorldGuardPlugin))
+			return null;
+
+		return (WorldGuardPlugin) plugin;
+
+	}
 
 }
