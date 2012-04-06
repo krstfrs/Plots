@@ -1,6 +1,6 @@
 name: Plots
 version: $version
-main: de.krstfrs.bukkit.plots.Plots
+main: de.krstfrs.bukkit.plots.PlotsPlugin
 softdepend: [WorldGuard, WorldEdit]
 
 commands:

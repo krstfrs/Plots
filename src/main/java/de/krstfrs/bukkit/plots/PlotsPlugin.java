@@ -22,19 +22,18 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
-import com.sk89q.worldedit.bukkit.selections.Selection;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
-import de.krstfrs.bukkit.plots.util.CommandException;
+import de.krstfrs.bukkit.plots.commands.ClaimPlotCommand;
+import de.krstfrs.bukkit.plots.commands.CommandException;
 
-public class Plots extends JavaPlugin {
+public class PlotsPlugin extends JavaPlugin {
 
 	private Logger log;
 	private PluginManager pm;
@@ -42,25 +41,37 @@ public class Plots extends JavaPlugin {
 	private WorldGuardPlugin worldGuard;
 	private WorldEditPlugin worldEdit;
 
+	private PlotsConfiguration plotsConfig;
+
+	private ClaimPlotCommand claimPlotCommand;
+
 	@Override
 	public void onEnable() {
 
 		log = this.getLogger();
 		pm = this.getServer().getPluginManager();
 
-		worldGuard = getWorldGuard();
+		worldGuard = loadWorldGuard();
 
 		if (worldGuard == null) {
 			log.log(Level.SEVERE, "WorldGuard not found, disabling Plots.");
 			pm.disablePlugin(this);
 		}
 
-		worldEdit = getWorldEdit();
+		worldEdit = loadWorldEdit();
 
 		if (worldEdit == null) {
 			log.log(Level.SEVERE, "WorldEdit not found, disabling Plots.");
 			pm.disablePlugin(this);
 		}
+
+		FileConfiguration config = this.getConfig();
+		config.options().copyDefaults(true);
+		this.saveConfig();
+
+		plotsConfig = new PlotsConfiguration(config);
+
+		claimPlotCommand = new ClaimPlotCommand(this);
 
 	}
 
@@ -76,7 +87,7 @@ public class Plots extends JavaPlugin {
 		try {
 
 			if (command.getName().equalsIgnoreCase("claimplot"))
-				commandClaimPlot(sender, args);
+				claimPlotCommand.execute(sender, args);
 
 		} catch (CommandException e) {
 			sender.sendMessage(ChatColor.RED + e.getMessage());
@@ -86,31 +97,25 @@ public class Plots extends JavaPlugin {
 
 	}
 
-	private void commandClaimPlot(CommandSender sender, String[] args)
-			throws CommandException {
+	public WorldGuardPlugin getWorldGuard() {
 
-		Player player = getPlayer(sender);
-
-		if (player == null)
-			throw new CommandException("Can only be executed by a player.");
-
-		Selection sel = worldEdit.getSelection(player);
-
-		if (sel == null)
-			throw new CommandException("Select a region with WorldEdit first.");
-
-		if (!(sel instanceof CuboidSelection))
-			throw new CommandException("Only cuboid selections are supported.");
-
-		CuboidSelection cuboid = (CuboidSelection) sel;
-
-		if (cuboid.getHeight() != cuboid.getWorld().getMaxHeight())
-			throw new CommandException(
-					"Expand your selection vertically first.");
+		return worldGuard;
 
 	}
 
-	private WorldGuardPlugin getWorldGuard() {
+	public WorldEditPlugin getWorldEdit() {
+
+		return worldEdit;
+
+	}
+
+	public PlotsConfiguration getPlotsConfig() {
+
+		return plotsConfig;
+
+	}
+
+	private WorldGuardPlugin loadWorldGuard() {
 
 		Plugin plugin = pm.getPlugin("WorldGuard");
 
@@ -121,7 +126,7 @@ public class Plots extends JavaPlugin {
 
 	}
 
-	private WorldEditPlugin getWorldEdit() {
+	private WorldEditPlugin loadWorldEdit() {
 
 		Plugin plugin = pm.getPlugin("WorldEdit");
 
@@ -129,15 +134,6 @@ public class Plots extends JavaPlugin {
 			return null;
 
 		return (WorldEditPlugin) plugin;
-
-	}
-
-	private Player getPlayer(CommandSender sender) {
-
-		if ((sender == null) || !(sender instanceof Player))
-			return null;
-
-		return (Player) sender;
 
 	}
 

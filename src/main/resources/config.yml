@@ -1,0 +1,6 @@
+min-width: 64
+max-width: 1024
+length-as-ratio: true
+min-length: 100
+max-length: 250
+
