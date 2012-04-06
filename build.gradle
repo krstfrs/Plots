@@ -1,0 +1,13 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+version = '0.0.0'
+
+version += (hasProperty('buildNumber') ? '-'+buildNumber : '-SNAPSHOT')
+
+processResources {
+
+	inputs.file(buildFile)
+
+	expand version: version
+}
