@@ -1,4 +1,9 @@
 name: Plots
 version: $version
 main: de.krstfrs.bukkit.plots.Plots
-softdepend: [WorldGuard]
+softdepend: [WorldGuard, WorldEdit]
+
+commands:
+  claimplot:
+    description: Claim a plot.
+    usage: /claimplot

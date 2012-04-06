@@ -19,18 +19,24 @@ package de.krstfrs.bukkit.plots;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 public class Plots extends JavaPlugin {
 
-	Logger log;
-	PluginManager pm;
+	private Logger log;
+	private PluginManager pm;
 
-	WorldGuardPlugin worldGuard;
+	private WorldGuardPlugin worldGuard;
+	private WorldEditPlugin worldEdit;
 
 	@Override
 	public void onEnable() {
@@ -41,7 +47,14 @@ public class Plots extends JavaPlugin {
 		worldGuard = getWorldGuard();
 
 		if (worldGuard == null) {
-			log.log(Level.SEVERE, "WorldGuard not found, disabling Plots");
+			log.log(Level.SEVERE, "WorldGuard not found, disabling Plots.");
+			pm.disablePlugin(this);
+		}
+
+		worldEdit = getWorldEdit();
+
+		if (worldEdit == null) {
+			log.log(Level.SEVERE, "WorldEdit not found, disabling Plots.");
 			pm.disablePlugin(this);
 		}
 
@@ -49,6 +62,31 @@ public class Plots extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+
+	}
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command,
+			String label, String[] args) {
+
+		if (command.getName().equalsIgnoreCase("claimplot"))
+			return commandClaim(sender, args);
+
+		return false;
+
+	}
+
+	private boolean commandClaim(CommandSender sender, String[] args) {
+
+		Player player = getPlayer(sender);
+
+		if (player == null) {
+			sender.sendMessage(ChatColor.RED
+					+ "Can only be executed by a player.");
+			return false;
+		}
+
+		return false;
 
 	}
 
@@ -60,6 +98,26 @@ public class Plots extends JavaPlugin {
 			return null;
 
 		return (WorldGuardPlugin) plugin;
+
+	}
+
+	private WorldEditPlugin getWorldEdit() {
+
+		Plugin plugin = pm.getPlugin("WorldEdit");
+
+		if ((plugin == null) || !(plugin instanceof WorldEditPlugin))
+			return null;
+
+		return (WorldEditPlugin) plugin;
+
+	}
+
+	private Player getPlayer(CommandSender sender) {
+
+		if ((sender == null) || !(sender instanceof Player))
+			return null;
+
+		return (Player) sender;
 
 	}
 
